@@ -1,0 +1,4 @@
+if height=0 then the subsequence mast will calculation using same wind pressure ,,,
+in service wind pressure,250,,
+out of service wind pressure section,20,100,0
+out of service wind pressure,800,1100,1300

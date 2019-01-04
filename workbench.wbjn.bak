@@ -1,0 +1,15 @@
+import os
+import sys
+import clr
+from System.Diagnostics import Process
+
+if __name__=='__main__':
+oriDirectory=str(os.path.dirname(os.path.abspath(__file__))) 
+os.chdir(oriDirectory)
+p=Process()
+p.StartInfo.UseShellExecute=False
+p.StartInfo.RedirectStandardOutput=False
+p.StartInfo.FileName=
+p.Start()
+p.WaitForExit()
+print(p.ExitCode)
