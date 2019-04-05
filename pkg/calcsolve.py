@@ -109,11 +109,11 @@ class case_solver():
 
 			deWP=0  # deflection by wind pressure for each tie (sum of all wind region)
 
-			print(list(zip(self.windForce,windReg)))
+#			print(list(zip(self.windForce,windReg)))
 			for wf,h in zip(self.windForce,windReg):
 				# find deflection by wind pressure in each wind region
 				deWP0=0
-
+				l_deWP0=[]
 				if len(windReg)==1:
 					previous_wp_height=0
 				else:
@@ -123,12 +123,15 @@ class case_solver():
 					else:
 						previous_wp_height=windReg[windReg.index(h)-1]
 
+
 				if anchor<h:
 					deWP0=wf*h/24*(6*(h-previous_wp_height)*anchor**2-4*anchor**3+anchor**4/(h-previous_wp_height))*-1
 				else:
 					deWP0=wf*h/24*(4*(h-previous_wp_height)**2*anchor-(h-previous_wp_height)**3)*-1
 				deWP+=deWP0
+				l_deWP0.append(deWP0)
 			l_deWP.append(deWP)
+			print(l_deWP0)
 
 			# deflection cause by anchor forces
 			# l_dA[1][1] force cause by anchor 1 at anchor 1, l_dA[1][2] force cause by anchor 2 at anchor 1, l_dA[2][2] force cause by anchor 2 at anchor 2
@@ -148,12 +151,19 @@ class case_solver():
 				l_dASub.append(dA)
 			l_dA.append(l_dASub)
 
+
 		# print(l_deM)
 		# print(l_deFh)
 		# print(l_deWP)
 
 		l_de=[k1+k2+k3 for k1,k2,k3 in zip(l_deM,l_deFh,l_deWP)]   # sum of deflection
 
+		# str_de=[str(q1)+' >> '+str(q2)+' >> '+str(q3) for q1,q2,q3 in zip(l_deM,l_deFh,l_deWP)]
+		# for ix in str_de:
+		# 	print(ix)
+		# print matrix
+		# print(l_dA)
+		# print(l_de)
 
 		arr_fa=np.linalg.solve(np.array(l_dA),np.array(l_de))
 		# arr_fa value change to int in list format

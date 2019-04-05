@@ -50,9 +50,17 @@ class CaseSceneIns():
     def run_solve(self,path,dictData):
         # solve for in service and out of service, all anchora tighten and alt released configuration
 
+        inStr="""
+
+____________________________________
+
+
+        """
         tie_release=0
         strInService='In service'
         strOutOfService='Out of service'
+
+        print(inStr+strInService+' '+'tighten'+inStr)
         solverInTighten=case_solver(
             path,
             dictData.get('Anchorage'),
@@ -66,7 +74,7 @@ class CaseSceneIns():
             )
         rInTighten=solverInTighten.output_table()
 
-
+        print(inStr+strOutOfService+' '+'tighten'+inStr)
         solverOutTighten=case_solver(
             path,
             dictData.get('Anchorage'),
@@ -83,6 +91,7 @@ class CaseSceneIns():
 
 
         tie_release=1
+        print(inStr+strInService+' '+'released'+inStr)
         solverInReleased=case_solver(
             path,
             dictData.get('Anchorage'),
@@ -96,7 +105,7 @@ class CaseSceneIns():
             )
         rInReleased=solverInReleased.output_table()
 
-
+        print(inStr+strOutOfService+' '+'released'+inStr)
         solverOutReleased=case_solver(
             path,
             dictData.get('Anchorage'),
