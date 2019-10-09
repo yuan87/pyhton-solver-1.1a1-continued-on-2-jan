@@ -8,7 +8,8 @@ import gc
 import pandas as pd
 import pickle
 import json
-
+from sympy.physics.continuum_mechanics.beam import Beam
+from sympy import symbols
 
 gc.enable()
 
@@ -75,11 +76,64 @@ class case_solver():
 		title='Mast Height %sm,  Anchorage:%s,  %s,  %s'
 		title=title %(str(mastHeight),str(listAnchor0),self.strTie,self.windCondition)
 
+		self.cal_flag='NOT YET CALCULATE' # flag for using which method to calulate
 		self.title=title
-		self.calc()
+		# self.calc()
+		self.calc_sympy()
+
+	def calc_sympy(self):
+		self.cal_flag='CALCULATE BY SYMPY' # change flag to CALCULATE BY SYMPY
+		if (self.tie_release==1):
+			self.listAnchor=self.alt_release_tie(self.listAnchor0)
+		else:
+			self.listAnchor=self.listAnchor0
+
+		# total deflection by external load
+		moment=self.topLoad[0]
+		force_horizontal=self.topLoad[1]
+		force_verticle=self.topLoad[2]
+
+		E, I = symbols('E, I')
+		# create tuple for constrain: base translation constrain, base rotation constrain, constrain of anchorage[1,2,3,...]
+
+		# R1: assign force reaction at foundation, M1: assign moment reaction at foundation
+		R1,M1=symbols('R1,M1')
+		dict_anc=dict()
+		for countA in range(1,len(self.listAnchor)+1):
+			dict_anc['A'+str(countA)]=symbols('A'+str(countA))
+
+		beam = Beam(float(self.mastHeight), E, I)
+		beam.apply_load(R1,0,-1) # apply reaction force at height=0
+		beam.apply_load(M1,0,-2) # apply reaction moment at height=0
+		beam.bc_slope.append((0, 0)) # boundary condition at h=0, slope=0
+		beam.bc_deflection.append((0, 0)) # boundary condition at h=0, deflection=0
+
+
+		for countAA in range(1,len(self.listAnchor)+1):
+			# apply reaction force at each anchorage
+			beam.apply_load(dict_anc['A'+str(countAA)],self.listAnchor[countAA-1],-1)
+			# apply boundary condition at each anchorage, deflection=0
+			beam.bc_deflection.append((self.listAnchor[countAA-1],0))
+
+		# apply external loads
+		beam.apply_load(moment*-1,float(self.mastHeight),-2) # apply moment
+		beam.apply_load(force_horizontal,float(self.topWindHeight),-1) # apply horizontal force
+
+		windRegn=self.windForceRegion[:]
+		windRegn.append(self.mastHeight)
+		print(windRegn)
+		nc=0
+		# apply wind pressure
+		for height_w, f_w in zip(windRegn[1:],self.windForce):
+
+			beam.apply_load(f_w,windRegn[nc],0,end=windRegn[nc+1])
+			nc+=1
+
+		# solve for reaction
 
 
 	def calc(self):
+		self.cal_flag='CALCULATE BY FORMULA' # change flag to CALCULATE BY FORMULA
 		if (self.tie_release==1):
 			self.listAnchor=self.alt_release_tie(self.listAnchor0)
 		else:
@@ -109,9 +163,11 @@ class case_solver():
 
 			deWP=0  # deflection by wind pressure for each tie (sum of all wind region)
 
-#			print(list(zip(self.windForce,windReg)))
+			# print(list(zip(self.windForce,windReg)))
+
 			for wf,h in zip(self.windForce,windReg):
 				# find deflection by wind pressure in each wind region
+
 				deWP0=0
 				l_deWP0=[]
 				if len(windReg)==1:
@@ -123,6 +179,7 @@ class case_solver():
 					else:
 						previous_wp_height=windReg[windReg.index(h)-1]
 
+				print('Wind Force: '+str(wf)+'\nHeight: '+str(h)+'\nPrevious Height: '+str(previous_wp_height))
 
 				if anchor<h:
 					deWP0=wf*h/24*(6*(h-previous_wp_height)*anchor**2-4*anchor**3+anchor**4/(h-previous_wp_height))*-1
@@ -138,10 +195,10 @@ class case_solver():
 			l_dASub=list()
 			for anchorAct in self.listAnchor:
 				# loop 1:calculate force acting of anchor1 by anchor 1,2,3 ....n
-#				if anchor<anchorAct:
-#					dA=1*anchorAct**3/3*(anchorAct-anchor)/2/anchorAct+(anchorAct-anchor)**3/2/anchorAct**3
-#				else:
-#					dA=1*anchorAct**3/3*(1+3*(anchor-anchorAct)/2/anchorAct)
+				# if anchor<anchorAct:
+				# 	dA=1*anchorAct**3/3*(anchorAct-anchor)/2/anchorAct+(anchorAct-anchor)**3/2/anchorAct**3
+				# else:
+				# 	dA=1*anchorAct**3/3*(1+3*(anchor-anchorAct)/2/anchorAct)
 
 				if anchor<anchorAct:
 					dA=anchor**2/6*(anchor-3*anchorAct)

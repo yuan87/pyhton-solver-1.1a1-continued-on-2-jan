@@ -134,10 +134,11 @@ def is_kernel():
 
 if __name__=='__main__':
 
+	default_path=r'D:\TYS\Project\pyhton-solver-1.1a1-continued on 2 jan'
 	run_from_kernel=is_kernel()
 
 	if run_from_kernel:
-		path=input('Please key in file location (Folder)')
+		path=input('Please key in file location (Folder):') or default_path # if input is empty string, use default value(path)
 	else:
 		path=str(os.path.dirname(os.path.abspath(__file__)))
 	path_text=path.replace('\\','/')+'/'
