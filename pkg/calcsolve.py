@@ -105,8 +105,8 @@ class case_solver():
 		beam = Beam(float(self.mastHeight), E, I)
 		beam.apply_load(R1,0,-1) # apply reaction force at height=0
 		beam.apply_load(M1,0,-2) # apply reaction moment at height=0
-		beam.bc_slope.append((0, 0)) # boundary condition at h=0, slope=0
-		beam.bc_deflection.append((0, 0)) # boundary condition at h=0, deflection=0
+		beam.bc_slope.append((self.windForceRegion[0], 0)) # boundary condition at h=0, slope=0
+		beam.bc_deflection.append((self.windForceRegion[0], 0)) # boundary condition at h=0, deflection=0
 
 
 		for countAA in range(1,len(self.listAnchor)+1):
@@ -121,16 +121,20 @@ class case_solver():
 
 		windRegn=self.windForceRegion[:]
 		windRegn.append(self.mastHeight)
-		print(windRegn)
+		# print(windRegn)
 		nc=0
 		# apply wind pressure
-		for height_w, f_w in zip(windRegn[1:],self.windForce):
+		for f_w in self.windForce:
 
 			beam.apply_load(f_w,windRegn[nc],0,end=windRegn[nc+1])
 			nc+=1
 
 		# solve for reaction
+		beam.solve_for_reaction_loads(R1,M1)
+		for countAB in range(1,len(self.listAnchor)+1):
+			beam.solve_for_reaction_loads(dict_anc.get('A'+str(countAB)))
 
+		print(beam._reaction_loads)
 
 	def calc(self):
 		self.cal_flag='CALCULATE BY FORMULA' # change flag to CALCULATE BY FORMULA
