@@ -130,7 +130,10 @@ class case_solver():
 			nc+=1
 
 		# solve for reaction
-		beam.solve_for_reaction_loads(R1,M1)
+		l_anc=[R1,M1]+list(dict_anc.values())  # get value in dict_anc to list
+		# extend beam class and rewrite solve_for_reaction_loads function
+
+		beam.solve_for_reaction_loads(tup)
 		for countAB in range(1,len(self.listAnchor)+1):
 			beam.solve_for_reaction_loads(dict_anc.get('A'+str(countAB)))
 
