@@ -78,6 +78,7 @@ class case_solver():
 
 		self.cal_flag='NOT YET CALCULATE' # flag for using which method to calulate
 		self.title=title
+
 		# self.calc()
 		self.calc_sympy()
 
@@ -98,9 +99,14 @@ class case_solver():
 
 		# R1: assign force reaction at foundation, M1: assign moment reaction at foundation
 		R1,M1=symbols('R1,M1')
-		dict_anc=dict()
-		for countA in range(1,len(self.listAnchor)+1):
-			dict_anc['A'+str(countA)]=symbols('A'+str(countA))
+
+		# Assign anchorage force sysbols programically
+		listAnchorSym=[]
+		for countA in range(0,len(self.listAnchor)):
+			listAnchorSym.append(symbols('A'+str(countA+1)))
+
+		for aaa in listAnchorSym:
+			print(aaa)
 
 		beam = Beam(float(self.mastHeight), E, I)
 		beam.apply_load(R1,0,-1) # apply reaction force at height=0
@@ -111,7 +117,7 @@ class case_solver():
 
 		for countAA in range(1,len(self.listAnchor)+1):
 			# apply reaction force at each anchorage
-			beam.apply_load(dict_anc['A'+str(countAA)],self.listAnchor[countAA-1],-1)
+			beam.apply_load(listAnchorSym[countAA-1],self.listAnchor[countAA-1],-1)
 			# apply boundary condition at each anchorage, deflection=0
 			beam.bc_deflection.append((self.listAnchor[countAA-1],0))
 
@@ -130,17 +136,20 @@ class case_solver():
 			nc+=1
 
 		# solve for reaction
-		l_anc=[R1,M1]+list(dict_anc.values())  # get value in dict_anc to list
-		# extend beam class and rewrite solve_for_reaction_loads function
-
-		# beam.solve_for_reaction_loads(tup)
+		# l_anc=[R1,M1]+list(dict_anc.values())  # get value in dict_anc to list
 
 
-		for countAB in range(1,len(self.listAnchor)+1):
+		### beam.solve_for_reaction_loads(tup)
 
-			beam.solve_for_reaction_loads(dict_anc.get('A'+str(countAB)))
+		strOfAncSym=''
+		for countAB in range(0,len(self.listAnchor)):
 
+			strOfAncSym+=', listAnchorSym[{}]'.format(str(countAB))
+
+		exec('beam.solve_for_reaction_loads(R1, M1{})'.format(strOfAncSym))
 		print(beam._reaction_loads)
+
+		self.tab_fa=list(zip(self.listAnchor,list(beam._reaction_loads.values())))
 
 	def calc(self):
 		self.cal_flag='CALCULATE BY FORMULA' # change flag to CALCULATE BY FORMULA
