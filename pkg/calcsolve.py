@@ -79,8 +79,8 @@ class case_solver():
 		self.cal_flag='NOT YET CALCULATE' # flag for using which method to calulate
 		self.title=title
 
-		# self.calc()
-		self.calc_sympy()
+		self.calc()
+		# self.calc_sympy()
 
 	def calc_sympy(self):
 		self.cal_flag='CALCULATE BY SYMPY' # change flag to CALCULATE BY SYMPY
@@ -105,9 +105,6 @@ class case_solver():
 		for countA in range(0,len(self.listAnchor)):
 			listAnchorSym.append(symbols('A'+str(countA+1)))
 
-		for aaa in listAnchorSym:
-			print(aaa)
-
 		beam = Beam(float(self.mastHeight), E, I)
 		beam.apply_load(R1,0,-1) # apply reaction force at height=0
 		beam.apply_load(M1,0,-2) # apply reaction moment at height=0
@@ -122,7 +119,7 @@ class case_solver():
 			beam.bc_deflection.append((self.listAnchor[countAA-1],0))
 
 		# apply external loads
-		beam.apply_load(moment*-1,float(self.mastHeight),-2) # apply moment
+		beam.apply_load(moment,float(self.mastHeight),-2) # apply moment
 		beam.apply_load(force_horizontal,float(self.topWindHeight),-1) # apply horizontal force
 
 		windRegn=self.windForceRegion[:]
@@ -149,7 +146,7 @@ class case_solver():
 		exec('beam.solve_for_reaction_loads(R1, M1{})'.format(strOfAncSym))
 		print(beam._reaction_loads)
 
-		self.tab_fa=list(zip(self.listAnchor,list(beam._reaction_loads.values())))
+		self.tab_fa=list(zip(self.listAnchor,list(beam._reaction_loads.values())[2:]))
 
 	def calc(self):
 		self.cal_flag='CALCULATE BY FORMULA' # change flag to CALCULATE BY FORMULA
@@ -255,7 +252,7 @@ class case_solver():
 
 	def output_table(self):
 		l_fa_to_an=list()
-
+		print(self.tab_fa)
 		for anchor in self.listAnchor0:
 			boo=False
 			for anchor0,fa in self.tab_fa:

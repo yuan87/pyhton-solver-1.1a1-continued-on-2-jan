@@ -69,7 +69,9 @@ def output():
 	alst3=[lststr1]+format_list(alst03)
 
 	df0=pd.DataFrame(alst0)
+
 	display(df0)
+
 
 	c_out0=path_text+'0 In service -all tighten.csv'
 	c_out1=path_text+'0 Out service -all tighten.csv'

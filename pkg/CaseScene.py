@@ -17,7 +17,7 @@ gc.enable()
 
 class CaseSceneIns():
     '''
-    This class is function as create instances of case_reader and case_solver, ie: create creating different case
+    This class functions as create instances of case_reader and case_solver, ie: create creating different case
     Define working condition and cases here
     '''
 
