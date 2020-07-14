@@ -79,8 +79,8 @@ class case_solver():
 		self.cal_flag='NOT YET CALCULATE' # flag for using which method to calulate
 		self.title=title
 
-		self.calc()
-		# self.calc_sympy()
+		# self.calc()
+		self.calc_sympy()
 
 	def calc_sympy(self):
 		self.cal_flag='CALCULATE BY SYMPY' # change flag to CALCULATE BY SYMPY
@@ -128,8 +128,13 @@ class case_solver():
 		nc=0
 		# apply wind pressure
 		for f_w in self.windForce:
-
-			beam.apply_load(f_w,windRegn[nc],0,end=windRegn[nc+1])
+			# print('1st: '+str(windRegn[nc]))
+			# print('2nd: '+str(windRegn[nc+1]))
+			# print('Force: '+str(f_w))
+			exStr='beam.apply_load(f_w,'+str(windRegn[nc])+',0,end='+str(windRegn[nc+1])+')'
+			print(exStr)
+			exec(exStr)
+			# beam.apply_load(f_w,windRegn[nc],0,end=windRegn[nc+1])
 			nc+=1
 
 		# solve for reaction
